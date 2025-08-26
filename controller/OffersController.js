@@ -25,7 +25,6 @@ class OffersController {
     static async addOffer(offerData) {
         const { name, description, price, type, category } = offerData;
 
-        // Validate category
         const validCategories = ['data', 'sms', 'voice'];
         if (!validCategories.includes(category)) {
             throw new Error('Invalid offer category. Must be one of: data, sms, voice');
@@ -75,7 +74,6 @@ class OffersController {
             throw new Error('No valid fields to update');
         }
 
-        // Add updated_at timestamp
         updates.push(`updated_at = NOW()`);
 
         values.push(id);
@@ -90,25 +88,22 @@ class OffersController {
         return result.rows[0];
     }
 
-    // Delete an offer
     static async deleteOffer(id) {
         const query = 'DELETE FROM offers WHERE id = $1 RETURNING id';
         const result = await pool.query(query, [id]);
         return result.rows[0];
     }
 
-    // Get a single offer by ID
     static async getOfferById(id) {
         const query = 'SELECT * FROM offers WHERE id = $1';
         const result = await pool.query(query, [id]);
         return result.rows[0];
     }
 
-    // Delete all offers (use with caution)
     static async deleteAllOffers() {
         const query = 'DELETE FROM offers RETURNING id';
         const result = await pool.query(query);
-        return result.rowCount; // Return number of deleted rows
+        return result.rowCount;
     }
 }
 
