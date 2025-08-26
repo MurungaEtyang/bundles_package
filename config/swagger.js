@@ -14,8 +14,12 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:8000/api',
-        description: 'Development server',
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://api.mpesa.ziz.co.ke/api' 
+          : 'http://localhost:8000/api',
+        description: process.env.NODE_ENV === 'production' 
+          ? 'Production server' 
+          : 'Development server',
       },
     ],
     components: {
