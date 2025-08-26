@@ -2,10 +2,10 @@ import { Router } from 'express';
 import authRoutes from './routes/authRoutes.js';
 import offerRoutes from './routes/offerRoutes.js';
 import mpesaRoutes from './routes/mpesaRoutes.js';
+import transactionRoutes from './routes/transactionRoutes.js';
 
 const router = Router();
 
-// Health check endpoint
 router.get('/health', (req, res) => {
     res.status(200).json({
         status: 'success',
@@ -14,10 +14,11 @@ router.get('/health', (req, res) => {
     });
 });
 
-// API routes
+// Mount all routes directly under /api
 router.use('/auth', authRoutes);
 router.use('/offers', offerRoutes);
 router.use('/mpesa', mpesaRoutes);
+router.use('/transactions', transactionRoutes);
 
 // 404 handler
 router.use((req, res) => {
@@ -28,7 +29,6 @@ router.use((req, res) => {
     });
 });
 
-// Error handling middleware
 router.use((err, req, res, next) => {
     console.error('Error:', err);
     

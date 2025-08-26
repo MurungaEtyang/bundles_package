@@ -6,6 +6,64 @@ const router = Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Offer:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: The auto-generated ID of the offer
+ *         name:
+ *           type: string
+ *           description: The name of the offer
+ *         description:
+ *           type: string
+ *           description: Detailed description of the offer
+ *         price:
+ *           type: number
+ *           format: float
+ *           description: Price of the offer in KES
+ *         type:
+ *           type: string
+ *           description: Type of the offer (e.g., 'daily', 'weekly', 'monthly')
+ *         category:
+ *           type: string
+ *           enum: [data, sms, voice]
+ *           description: Category of the offer
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ * 
+ *     OfferInput:
+ *       type: object
+ *       required:
+ *         - name
+ *         - price
+ *         - type
+ *         - category
+ *       properties:
+ *         name:
+ *           type: string
+ *           example: "1GB Data Bundle"
+ *         description:
+ *           type: string
+ *           example: "1GB data valid for 24 hours"
+ *         price:
+ *           type: number
+ *           format: float
+ *           example: 100.00
+ *         type:
+ *           type: string
+ *           example: "daily"
+ *         category:
+ *           type: string
+ *           enum: [data, sms, voice]
+ *           example: "data"
+ * 
  * /offers:
  *   get:
  *     summary: Get all offers
@@ -20,7 +78,7 @@ const router = Router();
  *         description: Filter offers by category
  *     responses:
  *       200:
- *         description: A list of offers
+ *         description: A list of offers grouped by category
  *         content:
  *           application/json:
  *             schema:
@@ -29,9 +87,11 @@ const router = Router();
  *                 success:
  *                   type: boolean
  *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Offer'
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: array
+ *                     items:
+ *                       $ref: '#/components/schemas/Offer'
  */
 router.get('/', async (req, res, next) => {
     try {
@@ -107,10 +167,17 @@ router.get('/:id', async (req, res, next) => {
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
+ *       description: Offer object that needs to be created
  *       content:
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/OfferInput'
+ *           example:
+ *             name: "1GB Data Bundle"
+ *             description: "1GB data valid for 24 hours"
+ *             price: 100.00
+ *             type: "daily"
+ *             category: "data"
  *     responses:
  *       201:
  *         description: Offer created successfully
@@ -188,6 +255,43 @@ router.put('/:id', authenticateJwt, async (req, res, next) => {
     }
 });
 
+/**
+ * @swagger
+ * /offers/{id}:
+ *   delete:
+ *     summary: Delete an offer by ID
+ *     description: Permanently delete a specific offer (admin only)
+ *     tags: [Offers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the offer to delete
+ *     responses:
+ *       200:
+ *         description: Offer deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Offer deleted successfully"
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       403:
+ *         description: Forbidden - Admin access required
+ *       404:
+ *         description: Offer not found
+ */
 router.delete('/:id', authenticateJwt, async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -203,6 +307,52 @@ router.delete('/:id', authenticateJwt, async (req, res, next) => {
         res.json({
             success: true,
             message: 'Offer deleted successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+/**
+ * @swagger
+ * /offers:
+ *   delete:
+ *     summary: Delete all offers
+ *     description: Permanently delete all offers (admin only)
+ *     tags: [Offers]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All offers deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "All offers have been deleted"
+ *                 count:
+ *                   type: integer
+ *                   description: Number of offers deleted
+ *                   example: 5
+ *       401:
+ *         description: Unauthorized - Missing or invalid token
+ *       403:
+ *         description: Forbidden - Admin access required
+ */
+router.delete('/', authenticateJwt, async (req, res, next) => {
+    try {
+        const count = await OffersController.deleteAllOffers();
+        
+        res.json({
+            success: true,
+            message: `Successfully deleted ${count} offers`,
+            count
         });
     } catch (error) {
         next(error);

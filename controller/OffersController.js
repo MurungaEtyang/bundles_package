@@ -103,6 +103,13 @@ class OffersController {
         const result = await pool.query(query, [id]);
         return result.rows[0];
     }
+
+    // Delete all offers (use with caution)
+    static async deleteAllOffers() {
+        const query = 'DELETE FROM offers RETURNING id';
+        const result = await pool.query(query);
+        return result.rowCount; // Return number of deleted rows
+    }
 }
 
 export default OffersController;

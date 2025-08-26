@@ -32,3 +32,26 @@ CREATE TABLE IF NOT EXISTS mpesa_credentials(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Table to store M-Pesa transactions
+CREATE TABLE IF NOT EXISTS transactions (
+    id SERIAL PRIMARY KEY,
+    merchant_request_id VARCHAR(255) NOT NULL,
+    checkout_request_id VARCHAR(255) NOT NULL,
+    result_code INT NOT NULL,
+    result_desc VARCHAR(255) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    mpesa_receipt_number VARCHAR(100),
+    transaction_date TIMESTAMP,
+    phone_number VARCHAR(20) NOT NULL,
+    account_reference VARCHAR(100),
+    status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(merchant_request_id, checkout_request_id)
+);
+
+-- Index for faster lookups on common queries
+CREATE INDEX IF NOT EXISTS idx_transactions_phone ON transactions(phone_number);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+CREATE INDEX IF NOT EXISTS idx_transactions_receipt ON transactions(mpesa_receipt_number) WHERE mpesa_receipt_number IS NOT NULL;
+

@@ -120,10 +120,10 @@ class Payment {
                 BusinessShortCode: credentials.short_code,
                 Password: password,
                 Timestamp: timestamp,
-                TransactionType: 'CustomerPayBillOnline',
+                TransactionType: 'CustomerBuyGoodsOnline', 
                 Amount: Math.round(amount),
                 PartyA: formattedPhone,
-                PartyB: credentials.short_code,
+                PartyB: 3499162,
                 PhoneNumber: formattedPhone,
                 CallBackURL: MpesaCredentials.getCallbackUrl(),
                 AccountReference: `PKG-${packageId}`,
@@ -141,7 +141,7 @@ class Payment {
                     'Content-Type': 'application/json',
                     'Cache-Control': 'no-cache'
                 },
-                timeout: 30000 // 30 seconds timeout
+                timeout: 30000
             });
 
             return {
