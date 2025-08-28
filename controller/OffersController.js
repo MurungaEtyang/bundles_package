@@ -4,7 +4,7 @@ class OffersController {
     // Get all offers with optional filtering by category
     static async getOffers(category = null) {
         let query = `
-            SELECT id, name, description, price, type, category, created_at, updated_at 
+            SELECT id, name, description, price, type, category, purchase_limit, created_at, updated_at 
             FROM offers
         `;
 
@@ -23,20 +23,24 @@ class OffersController {
 
     // Add a new offer
     static async addOffer(offerData) {
-        const { name, description, price, type, category } = offerData;
+        const { name, description, price, type, category, purchase_limit = 'ONCE/DAY' } = offerData;
 
         const validCategories = ['data', 'sms', 'voice'];
         if (!validCategories.includes(category)) {
             throw new Error('Invalid offer category. Must be one of: data, sms, voice');
         }
 
+        if (purchase_limit && !['ONCE/DAY', 'DYNAMIC'].includes(purchase_limit)) {
+            throw new Error('Invalid purchase limit. Must be either ONCE/DAY or DYNAMIC');
+        }
+
         const query = `
-            INSERT INTO offers (name, description, price, type, category)
-            VALUES ($1, $2, $3, $4, $5)
-                RETURNING id, name, description, price, type, category, created_at, updated_at
+            INSERT INTO offers (name, description, price, type, category, purchase_limit)
+            VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING id, name, description, price, type, category, purchase_limit, created_at, updated_at
         `;
 
-        const values = [name, description, price, type, category];
+        const values = [name, description, price, type, category, purchase_limit];
         const result = await pool.query(query, values);
         return result.rows[0];
     }
@@ -69,6 +73,13 @@ class OffersController {
             updates.push(`category = $${paramCount++}`);
             values.push(category);
         }
+        if (purchase_limit !== undefined) {
+            if (!['ONCE/DAY', 'DYNAMIC'].includes(purchase_limit)) {
+                throw new Error('Invalid purchase limit. Must be either ONCE/DAY or DYNAMIC');
+            }
+            updates.push(`purchase_limit = $${paramCount++}`);
+            values.push(purchase_limit);
+        }
 
         if (updates.length === 0) {
             throw new Error('No valid fields to update');
@@ -81,7 +92,7 @@ class OffersController {
             UPDATE offers
             SET ${updates.join(', ')}
             WHERE id = $${paramCount}
-            RETURNING id, name, description, price, type, category, created_at, updated_at
+            RETURNING id, name, description, price, type, category, purchase_limit, created_at, updated_at
         `;
 
         const result = await pool.query(query, values);
@@ -95,7 +106,7 @@ class OffersController {
     }
 
     static async getOfferById(id) {
-        const query = 'SELECT * FROM offers WHERE id = $1';
+        const query = 'SELECT id, name, description, price, type, category, purchase_limit, created_at, updated_at FROM offers WHERE id = $1';
         const result = await pool.query(query, [id]);
         return result.rows[0];
     }

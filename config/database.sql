@@ -20,6 +20,18 @@ CREATE TABLE IF NOT EXISTS offers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+-- Add purchase_limit column if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name='offers' AND column_name='purchase_limit') THEN
+        ALTER TABLE offers 
+        ADD COLUMN purchase_limit VARCHAR(20) 
+        CHECK (purchase_limit IN ('ONCE/DAY', 'DYNAMIC')) 
+        DEFAULT 'ONCE/DAY';
+    END IF;
+END $$;
+
 -- Create an index on category for better query performance
 CREATE INDEX IF NOT EXISTS idx_offers_category ON offers(category);
 
@@ -31,6 +43,8 @@ CREATE TABLE IF NOT EXISTS mpesa_credentials(
     pass_key VARCHAR(100) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
 
 -- Table to store M-Pesa transactions
 CREATE TABLE IF NOT EXISTS transactions (

@@ -63,6 +63,11 @@ const router = Router();
  *           type: string
  *           enum: [data, sms, voice]
  *           example: "data"
+ *         purchase_limit:
+ *           type: string
+ *           enum: [ONCE/DAY, DYNAMIC]
+ *           default: ONCE/DAY
+ *           description: Purchase limit for the offer. ONCE/DAY means a user can purchase once per day, DYNAMIC means no limit.
  * 
  * /offers:
  *   get:
@@ -178,6 +183,7 @@ router.get('/:id', async (req, res, next) => {
  *             price: 100.00
  *             type: "daily"
  *             category: "data"
+ *             purchase_limit: "ONCE/DAY"
  *     responses:
  *       201:
  *         description: Offer created successfully
@@ -197,7 +203,7 @@ router.get('/:id', async (req, res, next) => {
  */
 router.post('/', authenticateJwt, async (req, res, next) => {
     try {
-        const { name, description, price, type, category } = req.body;
+        const { name, description, price, type, category, purchase_limit } = req.body;
 
         if (!name || !price || !type || !category) {
             return res.status(400).json({
@@ -206,12 +212,20 @@ router.post('/', authenticateJwt, async (req, res, next) => {
             });
         }
 
+        if (purchase_limit && !['ONCE/DAY', 'DYNAMIC'].includes(purchase_limit)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid purchase_limit. Must be either ONCE/DAY or DYNAMIC'
+            });
+        }
+
         const newOffer = await OffersController.addOffer({
-            name,
+name,
             description,
             price,
             type,
-            category
+            category,
+            purchase_limit
         });
 
         res.status(201).json({
