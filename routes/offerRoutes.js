@@ -238,6 +238,48 @@ name,
     }
 });
 
+/**
+ * @swagger
+ * /offers/{id}:
+ *   put:
+ *     summary: Update an existing offer
+ *     description: Update details of a specific offer (protected route)
+ *     tags: [Offers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the offer to update
+ *     requestBody:
+ *       required: true
+ *       description: Offer object that needs to be updated
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/OfferInput'
+ *     responses:
+ *       200:
+ *         description: Offer updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Offer'
+ *       400:
+ *         description: Invalid input or no update data provided
+ *       404:
+ *         description: Offer not found
+ */
 router.put('/:id', authenticateJwt, async (req, res, next) => {
     try {
         const { id } = req.params;

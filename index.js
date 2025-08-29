@@ -3,6 +3,7 @@ import authRoutes from './routes/authRoutes.js';
 import offerRoutes from './routes/offerRoutes.js';
 import mpesaRoutes from './routes/mpesaRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
+import themeRoutes from './routes/themeRoutes.js';
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.use('/auth', authRoutes);
 router.use('/offers', offerRoutes);
 router.use('/mpesa', mpesaRoutes);
 router.use('/transactions', transactionRoutes);
+router.use('/theme', themeRoutes);
 
 // 404 handler
 router.use((req, res) => {

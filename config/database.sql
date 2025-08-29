@@ -8,6 +8,15 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS theme_settings (
+    id SERIAL PRIMARY KEY,
+    section VARCHAR(100) UNIQUE NOT NULL,     -- e.g. 'body', 'header', 'footer'
+    styles JSONB NOT NULL,                    -- store properties in JSON
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT unique_section UNIQUE (section)
+);
+
 -- Create a single offers table with a category field
 CREATE TABLE IF NOT EXISTS offers (
     id SERIAL PRIMARY KEY,
